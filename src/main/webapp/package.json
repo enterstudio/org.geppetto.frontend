@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "anchorme": "^0.7.1",
+    "aphrodite": "^1.2.3",
     "babel-core": "^6.17.0",
     "babel-loader": "^6.2.5",
     "babel-plugin-transform-object-assign": "^6.8.0",
@@ -64,6 +65,7 @@
     "raw-loader": "^0.5.1",
     "react": "15.4.1",
     "react-dom": "15.4.1",
+    "react-images": "^0.5.5",
     "react-jsonschema-form": "^0.48.0",
     "react-player": "^0.18.0",
     "react-router": "^4.1.1",
