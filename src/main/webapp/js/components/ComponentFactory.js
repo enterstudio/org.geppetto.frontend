@@ -51,10 +51,6 @@ define(function (require) {
 				// 'POPUP': 'interface/popup/Popup'
 			},
 
-			// componentsShortcut : {
-			// 	"1": "POPUP"
-			// },
-
 			loadSpinner: function () {
 				//We require this synchronously to properly show spinner when loading projects
 				this.renderComponent(React.createFactory(spinner)(), document.getElementById("load-spinner"));
@@ -187,9 +183,9 @@ define(function (require) {
 	            	require.ensure([],function(require){
 	            		var cb = function (loadedModule) {
 							var component = that._addComponent(loadedModule, componentType, properties, container, callback, isWidget);
-							var renderedComponent = that._renderComponent(component, componentType, properties, container, callback, isWidget)
+							var renderedComponent = that._renderComponent(component, componentType, properties, container, callback, isWidget);
 							resolve(renderedComponent);
-	            		}
+	            		};
 	            		switch(componentType){
 		            		case 'FORM': require(['./interface/form/Form'], cb); break;
 				            case 'PANEL': require(['./controls/panel/Panel'],cb); break; 
