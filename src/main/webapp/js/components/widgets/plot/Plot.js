@@ -59,7 +59,7 @@ define(function (require) {
 		 * Default options for plotly widget, used if none specified when plot
 		 * is created.
 		 */
-		defaultOptions : function(){
+		defaultOptions : function() {
 			return {
 				autosize : true,
 				width : '100%',
@@ -112,6 +112,30 @@ define(function (require) {
 						color: 'rgb(255, 255, 255)'
 					},
 					ticks: 'outside',
+				},
+				zaxis: {
+					autorange :false,
+					showgrid: false,
+					showline: true,
+					zeroline : false,
+					mirror : true,
+					ticklen : 0,
+					tickcolor : 'rgb(255, 255, 255)',
+					linecolor: 'rgb(255, 255, 255)',
+					tickfont: {
+						family: 'Helvetica Neue, Helvetica, sans-serif',
+						size : 11,
+						color: 'rgb(255, 255, 255)'
+					},
+					titlefont : {
+						family: 'Helvetica Neue, Helevtica, sans-serif',
+						size : 12,
+						color: 'rgb(255, 255, 255)'
+					},
+					ticks: 'outside',
+					max: -9999999,
+					min: 9999999,
+					range : []
 				},
 				margin: {
 					l: 50,
@@ -586,27 +610,26 @@ define(function (require) {
 			return timeSeriesData;
 		},
 
-            updateXAxisRange : function(timeSeriesX) {
-                var localxmin = Math.min.apply(null, timeSeriesX);
-	        var localxmax = Math.max.apply(null, timeSeriesX);
+        updateXAxisRange: function (timeSeriesX) {
+            var localxmin = Math.min.apply(null, timeSeriesX);
+            var localxmax = Math.max.apply(null, timeSeriesX);
 
-                if (this.plotOptions.xaxis.min == undefined ||
-                    isNaN(this.plotOptions.xaxis.min)) {
-                    this.plotOptions.xaxis.min = Number.MAX_SAFE_INTEGER;
-                }
-                if (this.plotOptions.xaxis.max == undefined ||
-                    this.plotOptions.xaxis.max == window.Instances.time.getTimeSeries().slice(-1)[0] ||
-                    isNaN(this.plotOptions.xaxis.max))
+            if (this.plotOptions.xaxis.min == undefined ||
+                isNaN(this.plotOptions.xaxis.min)) {
+                this.plotOptions.xaxis.min = Number.MAX_SAFE_INTEGER;
+            }
+            if (this.plotOptions.xaxis.max == undefined ||
+                this.plotOptions.xaxis.max == window.Instances.time.getTimeSeries().slice(-1)[0] ||
+                isNaN(this.plotOptions.xaxis.max))
 
-                    this.plotOptions.xaxis.max = Number.MIN_SAFE_INTEGER;
+                this.plotOptions.xaxis.max = Number.MIN_SAFE_INTEGER;
 
-	        this.plotOptions.xaxis.min = Math.min(this.plotOptions.xaxis.min, localxmin);
-	        this.plotOptions.xaxis.max = Math.max(this.plotOptions.xaxis.max, localxmax);
+            this.plotOptions.xaxis.min = Math.min(this.plotOptions.xaxis.min, localxmin);
+            this.plotOptions.xaxis.max = Math.max(this.plotOptions.xaxis.max, localxmax);
 
-	        this.plotOptions.xaxis.range = [this.plotOptions.xaxis.min, this.plotOptions.xaxis.max];
-            },
-
-
+            this.plotOptions.xaxis.range = [this.plotOptions.xaxis.min, this.plotOptions.xaxis.max];
+        },
+        
 		updateYAxisRange : function(timeSeriesX, timeSeriesY){
 			var localxmin = Math.min.apply(null, timeSeriesX);
 			var localymin = Math.min.apply(null, timeSeriesY);
@@ -1125,6 +1148,79 @@ define(function (require) {
 
 			// track change in state of the widget
 			this.dirtyView = true;
+
+			return this;
+		},
+
+		plotScatter3dData: function(x_data, y_data, z_data, name){
+			var trace = {
+				opacity:0.4, type: 'scatter3d',
+				x: x_data,
+				y: y_data,
+				z: z_data,
+				mode:'lines+markers',
+				connectgaps: true,
+				name : name,
+				marker: {
+					color: 'rgb(0,255,255)',
+					line: {
+						color: 'rgba(217, 217, 217, 1.0)',
+						width: 1,
+					},
+					symbol: 'circle',
+					size: 10
+				}
+			};
+
+			var data = [trace];
+
+			var layout = {
+				autosize : true,
+				width : '100%',
+				height : '100%',
+				showgrid : false,
+				showlegend : true,
+				legend: {
+					x: 0.0178504672897196,
+					y: .9190087463556846,
+					bgcolor: '#E2E2E2',
+					bordercolor: '#FFFFFF',
+					borderwidth: 2,
+					font: {
+						family: 'sans-serif',
+						size: 12,
+						color: '#000'
+					}
+				},
+				scene: {
+					xaxis: {
+						backgroundcolor: "rgb(0,0,0)",
+						showbackground: true,
+						showgrid: false,
+						showline: false,
+						showticklabels: false,
+						title: 'x',
+					},
+					yaxis: {
+						backgroundcolor: "rgb(0,0,0)",
+						showbackground: true,
+						showgrid: false,
+						showline: false,
+						showticklabels: false,
+						title: 'y',
+					},
+					zaxis: {
+						backgroundcolor: "rgb(0,0,0)",
+						showbackground: true,
+						showgrid: false,
+						showline: false,
+						showticklabels: false,
+						title: 'z',
+					}
+				}
+			};
+
+			this.plotly = Plotly.newPlot(this.plotDiv, data, layout, {displayModeBar: true});
 
 			return this;
 		},
