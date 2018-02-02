@@ -152,9 +152,6 @@ define(function (require) {
 						color : '#fff'
 					},
 					x : 1,
-
-					//bgcolor : 'rgba(66, 59, 59, 0.90)'
-                    //bgcolor : 'rgba(0, 0, 0, 0)'
 				},
 				transition: {
 				      duration: 0
@@ -163,9 +160,6 @@ define(function (require) {
 				      duration: 0,
 				      redraw: false
 				},
-				//paper_bgcolor: 'rgba(66, 59, 59, 0.90)',
-                //paper_bgcolor: 'rgba(0, 0, 0, 0)',
-                //opacity:0.9,
 				plot_bgcolor: 'transparent',
 				playAll : false,
 				hovermode : 'none'
@@ -629,7 +623,7 @@ define(function (require) {
 
             this.plotOptions.xaxis.range = [this.plotOptions.xaxis.min, this.plotOptions.xaxis.max];
         },
-        
+
 		updateYAxisRange : function(timeSeriesX, timeSeriesY){
 			var localxmin = Math.min.apply(null, timeSeriesX);
 			var localymin = Math.min.apply(null, timeSeriesY);
@@ -1154,7 +1148,8 @@ define(function (require) {
 
 		plotScatter3dData: function(x_data, y_data, z_data, name){
 			var trace = {
-				opacity:0.4, type: 'scatter3d',
+				opacity:0.4, 
+				type: 'scatter3d',
 				x: x_data,
 				y: y_data,
 				z: z_data,
@@ -1192,35 +1187,48 @@ define(function (require) {
 						color: '#000'
 					}
 				},
-				scene: {
-					xaxis: {
-						backgroundcolor: "rgb(0,0,0)",
-						showbackground: true,
-						showgrid: false,
-						showline: false,
-						showticklabels: false,
-						title: 'x',
-					},
-					yaxis: {
-						backgroundcolor: "rgb(0,0,0)",
-						showbackground: true,
-						showgrid: false,
-						showline: false,
-						showticklabels: false,
-						title: 'y',
-					},
-					zaxis: {
-						backgroundcolor: "rgb(0,0,0)",
-						showbackground: true,
-						showgrid: false,
-						showline: false,
-						showticklabels: false,
-						title: 'z',
-					}
+				xaxis: {
+					backgroundcolor: "rgb(0,0,0)",
+					showbackground: true,
+					showgrid: false,
+					showline: false,
+					showticklabels: false,
+					title: 'x',
+				},
+				yaxis: {
+					backgroundcolor: "rgb(0,0,0)",
+					showbackground: true,
+					showgrid: false,
+					showline: false,
+					showticklabels: false,
+					title: 'y',
+				},
+				zaxis: {
+					backgroundcolor: "rgb(0,0,0)",
+					showbackground: true,
+					showgrid: false,
+					showline: false,
+					showticklabels: false,
+					title: 'z',
 				}
 			};
 
-			this.plotly = Plotly.newPlot(this.plotDiv, data, layout, {displayModeBar: true});
+			if(this.plotly==null){
+				this.plotOptions.xaxis.autorange = true;
+				this.xaxisAutoRange = true;
+				
+				this.plotly = Plotly.newPlot(this.plotDiv, data, layout, {displayModeBar: true});
+				var that = this;
+				this.plotDiv.on('plotly_doubleclick', function() {
+					that.resize();
+				});
+				this.plotDiv.on('plotly_click', function() {
+					that.resize();
+				});
+			}else{
+				Plotly.newPlot(this.plotDiv, data, layout, {displayModeBar: true});
+			}
+			this.resize(false);
 
 			return this;
 		},

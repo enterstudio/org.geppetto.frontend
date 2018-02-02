@@ -21,7 +21,8 @@ define(function (require) {
             TREEVISUALISERDAT: 3,
             VARIABLEVISUALISER: 5,
             CONNECTIVITY: 6,
-            STACKVIEWER: 8 
+            STACKVIEWER: 8, 
+            SCATTER: 9,
             //WIDGETNAME: N
         };
 
@@ -37,6 +38,7 @@ define(function (require) {
             treeVisDatController: null,
             treeVis3DController: null,
             stackViewer3DController: null,
+            scatterPlotController: null,
             //WIDGETNAMEController: null
 
             /**
@@ -73,6 +75,13 @@ define(function (require) {
                             this.plotsController = new PlotsController();
                         }
                         resolve(this.plotsController);
+                    }
+                    if (type == GEPPETTO.Widgets.SCATTER) {
+                        if (this.plotsController == null || undefined) {
+                        	ScatterPlotController = require('./scatterPlot/controllers/ScatterPlotsController');
+                            this.scatterPlotController = new ScatterPlotController();
+                        }
+                        resolve(this.scatterPlotController);
                     }
                     else if (type == GEPPETTO.Widgets.POPUP) {
                         if (this.popupsController == null || undefined) {
