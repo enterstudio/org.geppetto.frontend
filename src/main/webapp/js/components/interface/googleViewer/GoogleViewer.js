@@ -32,7 +32,7 @@ define(function (require) {
 				},
 				isPng: false,
 				maxZoom: 11,
-				minZoom: 0,
+				minZoom: 1,
 				radius: 1738000,
 				path: path
 			}
@@ -107,7 +107,6 @@ define(function (require) {
 
 				_this.map = new google.maps.Map(container, _this.state.mapSettings);
 
-				// tileSize: new google.maps.Size(256, 256),
 				_this.state.imageMapTypeSettings['tileSize'] = new google.maps.Size(_this.state.tileWidth, _this.state.tileHeight);
 				var imageMapType = new google.maps.ImageMapType(_this.state.imageMapTypeSettings);
 
@@ -119,8 +118,6 @@ define(function (require) {
 				});
 
 				_this.addResizeHandler();
-
-
 			});
 
 			GoogleMapsLoader.onLoad(function (google) {
@@ -128,17 +125,35 @@ define(function (require) {
 			});
 		}
 
-		addResizeHandler(){
+		addResizeHandler() {
 			var _this = this;
 			_this.newCenter = null;
 			google.maps.event.addListener(_this.map, 'idle', function () {
-				if (_this.newCenter== null){
+				if (_this.newCenter == null) {
 					_this.newCenter = _this.map.getCenter();
+					_this.allowedBounds = new google.maps.LatLngBounds(
+						new google.maps.LatLng(_this.newCenter.lat() - 35, _this.newCenter.lng() - 30),
+						new google.maps.LatLng(_this.newCenter.lat() + 35, _this.newCenter.lng() + 30)
+					);
 				}
 
 			});
 			google.maps.event.addListener(_this.map, 'resize', function () {
-				setTimeout(function () { _this.map.setCenter(_this.newCenter); }, 200);
+				_this.map.setCenter(_this.newCenter);
+				var minZoom = Math.ceil(Math.log2(_this.map.getDiv().children[0].offsetWidth / 256));
+				_this.map.setOptions({ minZoom: minZoom });
+				_this.map.setZoom(minZoom);
+			});
+
+			google.maps.event.addListener(_this.map, 'center_changed', function () {
+				if (_this.allowedBounds.contains(_this.map.getCenter())) {
+					// still within valid bounds, so save the last valid position
+					lastValidCenter = _this.map.getCenter();
+					return;
+				}
+
+				// not valid anymore => return to last valid position
+				_this.map.panTo(lastValidCenter);
 			});
 		}
 
