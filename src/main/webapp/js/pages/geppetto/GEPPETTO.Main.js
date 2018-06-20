@@ -107,9 +107,9 @@ define(function (require) {
              * Initialize web socket communication
              */
             init: function () {
-            	var host = GEPPETTO.MessageSocket.protocol + window.location.host + '/' + GEPPETTO_CONFIGURATION.contextPath + '/GeppettoServlet';
+            	var host = GEPPETTO.MessageSocket.protocol + window.location.host + '/' + GEPPETTO_CONFIGURATION.contextPath + '/GeppettoConnect';
             	if(GEPPETTO_CONFIGURATION.contextPath=="/"){
-            		host = GEPPETTO.MessageSocket.protocol + window.location.host.replace("8081","8080") + '/GeppettoServlet';
+            		host = GEPPETTO.MessageSocket.protocol + window.location.host.replace("8081","8080") + '/GeppettoConnect';
             	}
                 GEPPETTO.MessageSocket.connect(host);
                 console.log("Host for MessageSocket to connect: "+host);

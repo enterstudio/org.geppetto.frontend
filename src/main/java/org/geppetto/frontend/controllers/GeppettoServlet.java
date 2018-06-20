@@ -23,7 +23,6 @@ public final class GeppettoServlet extends HttpServlet {
 	
 	   public void init() throws ServletException {
 		   System.out.println("Servlet init has started");
-		//new WebsocketConnection();
 	   }
 
 	   public void doGet(HttpServletRequest request, HttpServletResponse response)

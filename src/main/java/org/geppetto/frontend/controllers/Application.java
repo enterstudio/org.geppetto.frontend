@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.security.Principal;
+import java.util.Map;
 import java.util.Scanner;
 
 import javax.servlet.ServletContext;
@@ -27,6 +29,8 @@ import org.geppetto.core.manager.IGeppettoManager;
 import org.geppetto.core.utilities.URLReader;
 import org.geppetto.frontend.tests.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,6 +51,13 @@ public class Application
 
 	private static Log logger = LogFactory.getLog(Application.class);
 
+	@MessageMapping("/GeppettoServlet")
+	public String processMessageFromClient(@Payload String message, Principal principal) throws Exception {
+		String name = new Gson().fromJson(message, Map.class).get("name").toString();
+		//messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/reply", name);
+		return name;
+	}
+	
 	private String getGeppetto(HttpServletRequest req, String page){
 		try
 		{

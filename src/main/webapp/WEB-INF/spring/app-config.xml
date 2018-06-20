@@ -4,6 +4,7 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:websocket="http://www.springframework.org/schema/websocket"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/context
@@ -12,6 +13,8 @@ http://www.springframework.org/schema/aop
 http://www.springframework.org/schema/aop/spring-aop.xsd
 http://www.springframework.org/schema/mvc
 http://www.springframework.org/schema/mvc/spring-mvc.xsd
+http://www.springframework.org/schema/websocket
+http://www.springframework.org/schema/websocket/spring-websocket.xsd
 http://www.eclipse.org/gemini/blueprint/schema/blueprint
 http://www.eclipse.org/gemini/blueprint/schema/blueprint/gemini-blueprint.xsd
 http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium
@@ -97,7 +100,18 @@ http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium/gemini-bluep
 	</bean>
 
 
+	<websocket:handlers allowed-origins="*">
+        <websocket:mapping path="/GeppettoWebHandler" handler="geppettoWebHandler"/>
+        <websocket:handshake-interceptors>
+            <bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor"/>
+        </websocket:handshake-interceptors>
+    </websocket:handlers>
 
+    <bean id="geppettoWebHandler" class="org.geppetto.frontend.controllers.WebsocketConnection"/>
 
-
+	<websocket:message-broker>
+        <websocket:stomp-endpoint path="/GeppettoConnect">
+        </websocket:stomp-endpoint>
+        <websocket:simple-broker prefix="/topic"/>
+    </websocket:message-broker>
 </beans>

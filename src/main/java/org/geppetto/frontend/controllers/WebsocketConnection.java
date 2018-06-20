@@ -43,6 +43,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.server.standard.SpringConfigurator;
 
 import com.google.gson.Gson;
@@ -54,9 +57,7 @@ import com.google.gson.reflect.TypeToken;
  * @author matteocantarelli
  *
  */
-@Component
-@ServerEndpoint(value = "/GeppettoServlet", configurator = SpringConfigurator.class)
-public class WebsocketConnection implements MessageSenderListener
+public class WebsocketConnection extends TextWebSocketHandler implements MessageSenderListener
 {
 
 	private static Log logger = LogFactory.getLog(WebsocketConnection.class);
@@ -70,11 +71,12 @@ public class WebsocketConnection implements MessageSenderListener
 
 	private MessageSender messageSender;
 
-    @Inject
+	@Autowired
 	private IGeppettoManager geppettoManager;
 
 	private Session userSession;
-	
+
+	@Autowired
 	public WebsocketConnection()
 	{
 		super();
@@ -99,6 +101,20 @@ public class WebsocketConnection implements MessageSenderListener
 		// End of the rant, I hope the above will sound silly and wrong in the future. Matteo
 		this.connectionHandler = new ConnectionHandler(this, geppettoManager);
 	}
+
+	@Override
+	   protected void handleTextMessage(WebSocketSession session, TextMessage message)
+	         throws Exception {
+
+	      String clientMessage = message.getPayload();
+
+	      if (clientMessage.startsWith("Hello") || clientMessage.startsWith("Hi")) {
+	         session.sendMessage(new TextMessage("Hello! What can i do for you?"));
+	      } else {
+	         session.sendMessage(
+	               new TextMessage("This is a simple hello world example of using Spring WebSocket."));
+	      }
+	   }
 
 
 	@OnOpen
