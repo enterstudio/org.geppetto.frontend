@@ -31,6 +31,7 @@ import org.geppetto.frontend.tests.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,12 +52,12 @@ public class Application
 
 	private static Log logger = LogFactory.getLog(Application.class);
 
-	@MessageMapping("/GeppettoServlet")
-	public String processMessageFromClient(@Payload String message, Principal principal) throws Exception {
-		String name = new Gson().fromJson(message, Map.class).get("name").toString();
-		//messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/reply", name);
-		return name;
+	@MessageMapping("/foo")
+	@SendTo("/topic/foo")
+	public void hello() throws Exception {
+		logger.error("Error while retrieving an authentication service");
 	}
+	
 	
 	private String getGeppetto(HttpServletRequest req, String page){
 		try

@@ -186,6 +186,7 @@ module.exports = function(env){
 	    node: {
 	        fs: 'empty',
 	        child_process: 'empty',
+	        net: 'empty',
 	        module: 'empty'
 	    }
     }

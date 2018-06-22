@@ -101,16 +101,13 @@ http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium/gemini-bluep
 
 
 	<websocket:handlers allowed-origins="*">
-        <websocket:mapping path="/GeppettoWebHandler" handler="geppettoWebHandler"/>
-        <websocket:handshake-interceptors>
-            <bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor"/>
-        </websocket:handshake-interceptors>
+        <websocket:mapping path="/myHandler" handler="myHandler"/>
     </websocket:handlers>
 
-    <bean id="geppettoWebHandler" class="org.geppetto.frontend.controllers.WebsocketConnection"/>
+    <bean id="myHandler" class="org.geppetto.frontend.controllers.WebsocketConnection"/>
 
-	<websocket:message-broker>
-        <websocket:stomp-endpoint path="/GeppettoConnect">
+	<websocket:message-broker application-destination-prefix="/app">
+        <websocket:stomp-endpoint path="/geppettoConnect"  allowed-origins="*">
         </websocket:stomp-endpoint>
         <websocket:simple-broker prefix="/topic"/>
     </websocket:message-broker>

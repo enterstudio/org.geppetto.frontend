@@ -90,6 +90,7 @@
     "remarkable": "^1.7.1",
     "slick-carousel": "^1.6.0",
     "stats.js": "^0.17.0",
+    "stompjs": "^2.3.3",
     "style-loader": "^0.13.2",
     "text": "^0.1.0",
     "three": "0.87.0",

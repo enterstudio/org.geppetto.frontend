@@ -13,6 +13,7 @@ define(function (require) {
         var InfoModal = require('../../components/controls/modals/InfoModal');
         var ProjectNode = require('../../geppettoProject/model/ProjectNode');
         var ReactDOM = require('react-dom');
+        var STOMP = require('stompjs');
 
         /**
          * @class GEPPETTO.Main
@@ -107,10 +108,13 @@ define(function (require) {
              * Initialize web socket communication
              */
             init: function () {
-            	var host = GEPPETTO.MessageSocket.protocol + window.location.host + '/' + GEPPETTO_CONFIGURATION.contextPath + '/GeppettoConnect';
+            	var host = GEPPETTO.MessageSocket.protocol + window.location.host + '/' + GEPPETTO_CONFIGURATION.contextPath + '/geppettoConnect';
             	if(GEPPETTO_CONFIGURATION.contextPath=="/"){
-            		host = GEPPETTO.MessageSocket.protocol + window.location.host.replace("8081","8080") + '/GeppettoConnect';
+            		host = GEPPETTO.MessageSocket.protocol + window.location.host.replace("8081","8080") + '/geppettoConnect';
             	}
+            	//socket way of connecting 
+            	//var socket = new WebSocket( '/' +GEPPETTO_CONFIGURATION.contextPath + '/geppettoConnect');
+            	//var stompClient = Stomp.client(socket);
                 GEPPETTO.MessageSocket.connect(host);
                 console.log("Host for MessageSocket to connect: "+host);
                 GEPPETTO.Events.listen();
