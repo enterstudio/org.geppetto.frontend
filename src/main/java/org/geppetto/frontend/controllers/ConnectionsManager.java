@@ -66,7 +66,7 @@ public class ConnectionsManager
 		for(WebsocketConnection client : this.getConnections())
 		{
 			CharBuffer buffer = CharBuffer.wrap("ping");
-			client.getSession().getAsyncRemote().sendObject(buffer);
+			//client.getSession().sendMessage(buffer);
 		}
 		for(WebsocketConnection client : toBeRemoved)
 		{

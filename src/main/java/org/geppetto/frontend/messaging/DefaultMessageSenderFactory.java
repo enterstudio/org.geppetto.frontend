@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.websocket.Session;
 
 import org.geppetto.frontend.messages.OutboundMessages;
+import org.springframework.web.socket.WebSocketSession;
 
 public class DefaultMessageSenderFactory {
 
@@ -16,7 +17,7 @@ public class DefaultMessageSenderFactory {
 	private int minMessageLengthForCompression = 20000;
 	private Set<OutboundMessages> queuedMessageTypes;
 
-	public DefaultMessageSender getMessageSender(Session wsOutbound, MessageSenderListener listener) {
+	public DefaultMessageSender getMessageSender(WebSocketSession userSession, MessageSenderListener listener) {
 
 		DefaultMessageSender messageSender = new DefaultMessageSender();
 		messageSender.addListener(listener);
@@ -28,7 +29,7 @@ public class DefaultMessageSenderFactory {
 		messageSender.setMinMessageLengthForCompression(minMessageLengthForCompression);
 		messageSender.setQueuedMessageTypes(queuedMessageTypes);
 
-		messageSender.initialize(wsOutbound);
+		messageSender.initialize(userSession);
 
 		return messageSender;
 	}

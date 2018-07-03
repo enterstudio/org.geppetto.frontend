@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.security.Principal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -29,6 +31,7 @@ import org.geppetto.core.manager.IGeppettoManager;
 import org.geppetto.core.utilities.URLReader;
 import org.geppetto.frontend.tests.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -48,16 +51,9 @@ import com.google.gson.JsonParser;
 public class Application
 {
 	@Autowired
-	private IGeppettoManager geppettoManager;
-
-	private static Log logger = LogFactory.getLog(Application.class);
-
-	@MessageMapping("/foo")
-	@SendTo("/topic/foo")
-	public void hello() throws Exception {
-		logger.error("Error while retrieving an authentication service");
-	}
+	private IGeppettoManager geppettoManager; 
 	
+	private static Log logger = LogFactory.getLog(Application.class);
 	
 	private String getGeppetto(HttpServletRequest req, String page){
 		try
@@ -128,7 +124,6 @@ public class Application
 		return getGeppetto(req, "");
 	}
 
-	@RequestMapping(value = "/**", method = RequestMethod.GET)
 	public String geppettoExtension(HttpServletRequest req, Model model)
 	{
 		String path = "/build/static" + req.getServletPath() + ".html";

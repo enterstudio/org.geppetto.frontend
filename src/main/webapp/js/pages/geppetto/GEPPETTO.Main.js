@@ -108,14 +108,11 @@ define(function (require) {
              * Initialize web socket communication
              */
             init: function () {
-            	var host = GEPPETTO.MessageSocket.protocol + window.location.host + '/' + GEPPETTO_CONFIGURATION.contextPath + '/geppettoConnect';
+            	var host = GEPPETTO.MessageSocket.protocol + window.location.host + '/' + GEPPETTO_CONFIGURATION.contextPath + '/myHandler';
             	if(GEPPETTO_CONFIGURATION.contextPath=="/"){
-            		host = GEPPETTO.MessageSocket.protocol + window.location.host.replace("8081","8080") + '/geppettoConnect';
-            	}
-            	//socket way of connecting 
-            	//var socket = new WebSocket( '/' +GEPPETTO_CONFIGURATION.contextPath + '/geppettoConnect');
-            	//var stompClient = Stomp.client(socket);
-                GEPPETTO.MessageSocket.connect(host);
+            		host = GEPPETTO.MessageSocket.protocol + window.location.host.replace("8081","8080") + '/myHandler';
+            	} 
+            	GEPPETTO.MessageSocket.connect(host);
                 console.log("Host for MessageSocket to connect: "+host);
                 GEPPETTO.Events.listen();
                 this.createChannel();

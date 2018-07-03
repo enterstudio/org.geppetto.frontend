@@ -187,7 +187,8 @@ module.exports = function(env){
 	        fs: 'empty',
 	        child_process: 'empty',
 	        net: 'empty',
-	        module: 'empty'
+	        module: 'empty',
+	        tls: 'empty'
 	    }
     }
 };

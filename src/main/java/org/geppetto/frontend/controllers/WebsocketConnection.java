@@ -1,7 +1,6 @@
 package org.geppetto.frontend.controllers;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
@@ -9,17 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
 import javax.websocket.ContainerProvider;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
 import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
-import javax.websocket.server.ServerEndpoint;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,13 +33,10 @@ import org.geppetto.model.datasources.RunnableQuery;
 import org.geppetto.simulation.manager.ExperimentRunManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-import org.springframework.web.socket.server.standard.SpringConfigurator;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -58,6 +47,7 @@ import com.google.gson.reflect.TypeToken;
  * @author matteocantarelli
  *
  */
+@Component
 public class WebsocketConnection extends TextWebSocketHandler implements MessageSenderListener
 {
 
@@ -75,143 +65,39 @@ public class WebsocketConnection extends TextWebSocketHandler implements Message
 	@Autowired
 	private IGeppettoManager geppettoManager;
 
-	private Session userSession;
+	private WebSocketSession userSession;
 
-	@Autowired
-	public WebsocketConnection()
+	public WebsocketConnection(IGeppettoManager geppettoManager2)
 	{
-		super();
-		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
-		// FIXME Matteo: The following line is in the wrong place but any proper place seems to break DataNucleus.
-		// By calling getInstance on the ExperimentRunManager we are initializing it since the first time getInstance
-		// is called we check the database to see if there are any experiments queued that should be executed.
-		// Calling getInstance on ExperimentRunManager triggers this process. Ideally the ExperimentRunManager
-		// should be a spring bean with scope singleton but when the different parts of the application were trying to use
-		// it autowired the application was hanging without exceptions or error...so this class became a traditional
-		// singleton. Ideally the singleton should be initialized as soon as the geppetto server starts, for this reason an
-		// ApplicationListenerBean was added. Unfortunately if the ExperimentRunManager is initialized before the bundle is
-		// started DataNucleus starts giving problems. In the initializaton of ExperimentRunManager there is a method called
-		// loadExperiment which queries the database to fetch the projects. After hours of investigation turns out that if
-		// a query is performed before the bundle is started then DataNucleus will subsequently have problems when performing
-		// perist opeartions, complaining that classes are not resolved and throwing ClassNotResolvedException. The issue
-		// was manifesting itself as soon as something was getting persisted, e.g. calling setActiveExperiment on a project.
-		// The downside of this line being here, beside being obviously the wrong place is that the ExperimentRunManager
-		// will get initialized only AFTER someone connects, so there has to be at least one connection before geppetto
-		// starts running experiments, this is as likely to happen as ugly.
-		ExperimentRunManager.getInstance();
-		// End of the rant, I hope the above will sound silly and wrong in the future. Matteo
-		this.connectionHandler = new ConnectionHandler(this, geppettoManager);
+//		super();
+//		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
+//		// FIXME Matteo: The following line is in the wrong place but any proper place seems to break DataNucleus.
+//		// By calling getInstance on the ExperimentRunManager we are initializing it since the first time getInstance
+//		// is called we check the database to see if there are any experiments queued that should be executed.
+//		// Calling getInstance on ExperimentRunManager triggers this process. Ideally the ExperimentRunManager
+//		// should be a spring bean with scope singleton but when the different parts of the application were trying to use
+//		// it autowired the application was hanging without exceptions or error...so this class became a traditional
+//		// singleton. Ideally the singleton should be initialized as soon as the geppetto server starts, for this reason an
+//		// ApplicationListenerBean was added. Unfortunately if the ExperimentRunManager is initialized before the bundle is
+//		// started DataNucleus starts giving problems. In the initializaton of ExperimentRunManager there is a method called
+//		// loadExperiment which queries the database to fetch the projects. After hours of investigation turns out that if
+//		// a query is performed before the bundle is started then DataNucleus will subsequently have problems when performing
+//		// perist opeartions, complaining that classes are not resolved and throwing ClassNotResolvedException. The issue
+//		// was manifesting itself as soon as something was getting persisted, e.g. calling setActiveExperiment on a project.
+//		// The downside of this line being here, beside being obviously the wrong place is that the ExperimentRunManager
+//		// will get initialized only AFTER someone connects, so there has to be at least one connection before geppetto
+//		// starts running experiments, this is as likely to happen as ugly.
+//		ExperimentRunManager.getInstance();
+//		// End of the rant, I hope the above will sound silly and wrong in the future. Matteo
+//		this.connectionHandler = new ConnectionHandler(this, geppettoManager);
+		this.geppettoManager = geppettoManager2;
 	}
 
 	@Override
 	   protected void handleTextMessage(WebSocketSession session, TextMessage message)
 	         throws Exception {
 
-	      String clientMessage = message.getPayload();
-
-	      if (clientMessage.startsWith("Hello") || clientMessage.startsWith("Hi")) {
-	         session.sendMessage(new TextMessage("Hello! What can i do for you?"));
-	      } else {
-	         session.sendMessage(
-	               new TextMessage("This is a simple hello world example of using Spring WebSocket."));
-	      }
-	   }
-
-
-	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		System.out.println("Session Binary size after establshd ");
-	}
-	
-	@Override
-	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-		System.out.println("Session Binary size handle transport error ");
-	}
-
-	@Override
-	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		System.out.println("Session Binary size after connecton closed ");
-	}
-
-	@OnOpen
-    public void onOpen(Session userSession) {
-		WebSocketContainer wsContainer =
-				ContainerProvider.getWebSocketContainer();
-		int bs = wsContainer.getDefaultMaxBinaryMessageBufferSize();
-		System.out.println(bs);
-		int bs2 = wsContainer.getDefaultMaxTextMessageBufferSize();
-		System.out.println(bs2);
-		wsContainer.setDefaultMaxBinaryMessageBufferSize(9999999);
-		wsContainer.setDefaultMaxTextMessageBufferSize(9999999);
-
-		int bs3 = wsContainer.getDefaultMaxBinaryMessageBufferSize();
-		System.out.println(bs3);
-		int bs4 = wsContainer.getDefaultMaxTextMessageBufferSize();
-		System.out.println(bs4);
-
-		userSession.setMaxTextMessageBufferSize(9999999);
-		userSession.setMaxBinaryMessageBufferSize(9999999);
-		System.out.println("Session Binary size >> " + userSession.getMaxBinaryMessageBufferSize());
-		System.out.println("Session Text size >> " + userSession.getMaxTextMessageBufferSize());
-
-		messageSender = messageSenderFactory.getMessageSender(userSession, this);
-		// User permissions are sent when socket is open
-		this.connectionHandler.checkUserPrivileges(null);
-		this.userSession = userSession;
-		connectionID = ConnectionsManager.getInstance().addConnection(this);
-		sendMessage(null, OutboundMessages.CLIENT_ID, connectionID);
-
-		System.out.println("Open Connection ..."+userSession.getId());
-	}
-
-	@OnClose
-    public void onClose(Session userSession) {
-		messageSender.shutdown();
-		connectionHandler.closeProject();
-		System.out.println("Closed Connection ..."+userSession.getId());
-	}
-	
-	@OnError
-	public void onError(Session session, Throwable thr) {
-		System.out.println("Error Connection ..."+userSession.getId()+ " error: " + thr.getMessage());
-	}
-	
-	@OnMessage
-	public void broadcastSnapshot(ByteBuffer data, Session session) throws IOException {
-	    System.out.println("broadcastBinary: " + data);
-        session.getBasicRemote().sendBinary(data);
-
-	}
-
-
-	/**
-	 * @param requestID
-	 * @param type
-	 * @param message
-	 */
-	public void sendMessage(String requestID, OutboundMessages type, String message)
-	{
-		messageSender.sendMessage(requestID, type, message);
-	}
-
-	/**
-	 * @param requestID
-	 * @param type
-	 * @param message
-	 */
-	public void sendBinaryMessage(String requestID, Path path)
-	{
-		messageSender.sendFile(path);
-	}
-
-	/**
-	 * Receives message(s) from client.
-	 * 
-	 * @throws IOException
-	 */
-	@OnMessage
-    public void onMessage(String message,Session userSession) {
-		String msg = message.toString();
+		String msg = message.getPayload();
 		System.out.println("Message from the client: " + msg);
 		Map<String, String> parameters;
 		long experimentId = -1;
@@ -536,6 +422,78 @@ public class WebsocketConnection extends TextWebSocketHandler implements Message
 				// NOTE: no other messages expected for now
 			}
 		}
+	   }
+
+
+	@Override
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		ExperimentRunManager.getInstance();
+		// End of the rant, I hope the above will sound silly and wrong in the future. Matteo
+		this.connectionHandler = new ConnectionHandler(this, geppettoManager);
+		
+		System.out.println("Session Binary size after establshd ");
+		WebSocketContainer wsContainer =
+				ContainerProvider.getWebSocketContainer();
+		int bs = wsContainer.getDefaultMaxBinaryMessageBufferSize();
+		System.out.println(bs);
+		int bs2 = wsContainer.getDefaultMaxTextMessageBufferSize();
+		System.out.println(bs2);
+		wsContainer.setDefaultMaxBinaryMessageBufferSize(9999999);
+		wsContainer.setDefaultMaxTextMessageBufferSize(9999999);
+
+		int bs3 = wsContainer.getDefaultMaxBinaryMessageBufferSize();
+		System.out.println(bs3);
+		int bs4 = wsContainer.getDefaultMaxTextMessageBufferSize();
+		System.out.println(bs4);
+
+		this.userSession = session;
+		this.messageSender = messageSenderFactory.getMessageSender(userSession, this);
+		// User permissions are sent when socket is open
+		this.connectionHandler.checkUserPrivileges(null);
+		connectionID = ConnectionsManager.getInstance().addConnection(this);
+		sendMessage(null, OutboundMessages.CLIENT_ID, connectionID);
+
+		System.out.println("Open Connection ..."+userSession.getId());
+	}
+	
+	@Override
+	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+		System.out.println("Error Connection ..."+userSession.getId()+ " error: " + exception.getMessage());
+	}
+
+	@Override
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+		messageSender.shutdown();
+		connectionHandler.closeProject();
+		System.out.println("Closed Connection ..."+userSession.getId());
+	}
+	
+	@OnMessage
+	public void broadcastSnapshot(ByteBuffer data, Session session) throws IOException {
+	    System.out.println("broadcastBinary: " + data);
+        session.getBasicRemote().sendBinary(data);
+
+	}
+
+
+	/**
+	 * @param requestID
+	 * @param type
+	 * @param message
+	 */
+	public void sendMessage(String requestID, OutboundMessages type, String message)
+	{
+		messageSender.sendMessage(requestID, type, message);
+	}
+
+	/**
+	 * @param requestID
+	 * @param type
+	 * @param message
+	 */
+	public void sendBinaryMessage(String requestID, Path path)
+	{
+		messageSender.sendFile(path);
 	}
 
 	/**
@@ -635,7 +593,7 @@ public class WebsocketConnection extends TextWebSocketHandler implements Message
 		String queryPath;
 	}
 
-	public Session getSession() {
+	public WebSocketSession getSession() {
 		return this.userSession;
 	}
 }

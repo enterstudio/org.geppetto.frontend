@@ -25,6 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import org.geppetto.frontend.messages.GeppettoTransportMessage;
 import org.geppetto.frontend.messages.OutboundMessages;
 import org.geppetto.frontend.messages.TransportMessageFactory;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 /**
  * <code>DefaultMessageSender</code> handles transmission of messages to a client via WebSockets.
@@ -82,7 +84,7 @@ public class DefaultMessageSender implements MessageSender
 	private PausableThreadPoolExecutor preprocessorExecutor;
 	private ArrayBlockingQueue<Runnable> senderQueue;
 	private PausableThreadPoolExecutor senderExecutor;
-	private Session wsOutbound;
+	private WebSocketSession wsOutbound;
 	private Set<MessageSenderListener> listeners = new HashSet<>();
 
 	private static final Log logger = LogFactory.getLog(DefaultMessageSender.class);
@@ -91,13 +93,13 @@ public class DefaultMessageSender implements MessageSender
 	{
 	}
 
-	public void initialize(Session wsOutbound)
+	public void initialize(WebSocketSession userSession)
 	{
 
 		logger.info(String.format("Initializing message sender - queuing: %b, compression: %b, " + "discard messages if queues full: %b", queuingEnabled, compressionEnabled,
 				discardMessagesIfQueueFull));
 
-		this.wsOutbound = wsOutbound;
+		this.wsOutbound = userSession;
 
 		if(queuingEnabled)
 		{
@@ -261,11 +263,11 @@ public class DefaultMessageSender implements MessageSender
 			
 			buffer.flip();
 
-			System.out.println("Last Session Binary size >> " + wsOutbound.getMaxBinaryMessageBufferSize());
-			System.out.println("Last Session Text size >> " + wsOutbound.getMaxTextMessageBufferSize());			
+			System.out.println("Last Session Binary size >> " + wsOutbound.getBinaryMessageSizeLimit());
+			System.out.println("Last Session Text size >> " + wsOutbound.getTextMessageSizeLimit());			
 			synchronized(wsOutbound) {
 				if (wsOutbound.isOpen()) {
-					wsOutbound.getBasicRemote().sendBinary(buffer);
+					//wsOutbound.sendMessage(buffer);
 			    }
 			}
 
@@ -368,7 +370,7 @@ public class DefaultMessageSender implements MessageSender
 		long startTime = System.currentTimeMillis();
 		try {
 			synchronized(wsOutbound) {
-				wsOutbound.getBasicRemote().sendText(message);
+				wsOutbound.sendMessage(new TextMessage(message));
 			}
 		} catch (IOException e) {
 			logger.error("Error sending text message " + e.getMessage());
@@ -403,7 +405,7 @@ public class DefaultMessageSender implements MessageSender
 		try {
 			synchronized(wsOutbound) {
 				if (wsOutbound.isOpen()) {
-					wsOutbound.getBasicRemote().sendBinary(buffer);
+					//wsOutbound.getBasicRemote().sendBinary(buffer);
 			    }
 			}
 		} catch (Exception e) {
